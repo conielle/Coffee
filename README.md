@@ -30,3 +30,8 @@ Version 1.0.1
 - Updated codebase to support iOS 14 and Cocoapods
 - Updated all dependencies
 - Minor code revision and bug fixes
+
+Version 2.0.0
+- UI Overhaul
+- Code revision
+- Bug fixes
