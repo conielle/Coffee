@@ -461,14 +461,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                         CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      (doc.data()['sender'] == 'Coffee Master')
-                                          ? Text(
-                                              'The Coffee Queue Is Empty',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                            )
-                                          : Text(
+                                     Text(
                                               "${doc.data()['sender']} requests a Coffee!",
                                               style: new TextStyle(
                                                   fontWeight: FontWeight.bold,
@@ -494,15 +487,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ),
                                       Column(
                                         children: <Widget>[
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Do you want coffee?',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : (doc.data()['clockwise'] ==
+                                         (doc.data()['clockwise'] ==
                                                       'true')
                                                   ? Text(
                                                       'Please stir clockwise',
@@ -522,15 +507,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Don\'t think about it...',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : (doc.data()['milk'] == 'false')
+                                         (doc.data()['milk'] == 'false')
                                                   ? Text(
                                                       'No milk please',
                                                       style: TextStyle(
@@ -549,15 +526,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Send in a request',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : (doc.data()['coffee'] == 'null')
+                                         (doc.data()['coffee'] == 'null')
                                                   ? Text(
                                                       'Just wing it with the coffee',
                                                       style: TextStyle(
@@ -624,15 +593,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Place your order',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : (doc.data()['sugar'] == 'null')
+                                          (doc.data()['sugar'] == 'null')
                                                   ? Text(
                                                       'Nope! No sugar thanks',
                                                       style: TextStyle(
@@ -661,15 +622,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Wait patiently...',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : (doc.data()['sweetner'] == 'null')
+                                         (doc.data()['sweetner'] == 'null')
                                                   ? Text(
                                                       'Nope! No sweetner thanks',
                                                       style: TextStyle(
@@ -699,15 +652,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                          (doc.data()['sender'] ==
-                                                  'Coffee Master')
-                                              ? Text(
-                                                  'Enjoy it!',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 7),
-                                                )
-                                              : Text(
+                                         Text(
                                                   'Thank you kindly.',
                                                   style: TextStyle(
                                                       color: Colors.white,
