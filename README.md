@@ -26,7 +26,7 @@ Version 1.0.0
 - What's Taking So Long produces pop-up on Barista's device with a siren sound
 - UI Overhaul
 
-Version 1.0.2
+Version 1.0.1
 - Updated codebase to support iOS 14 and Cocoapods
 - Updated all dependencies
 - Minor code revision and bug fixes
