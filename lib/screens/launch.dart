@@ -8,6 +8,7 @@ import 'package:coffee/components/rounded_button.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class LaunchScreen extends StatefulWidget {
   static const String id = 'launch_screen';
 
@@ -33,9 +34,12 @@ class _LaunchScreenState extends State<LaunchScreen>
   void firstPageChecker() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? false;
-    if (isFirstLaunch ?? null) {Navigator.pushNamed(context, WelcomeScreen.id);} else if (isFirstLaunch == true){
-      Navigator.pushNamed(context, WelcomeScreen.id);
-    } else {Navigator.pushNamed(context, ChatScreen.id);}
+
+    print(isFirstLaunch);
+
+    if (isFirstLaunch == false) {Navigator.pushNamed(context, WelcomeScreen.id);} else if (isFirstLaunch == true){
+      Navigator.pushNamed(context, ChatScreen.id);
+    } else {Navigator.pushNamed(context, WelcomeScreen.id);}
   }
 
 
@@ -44,18 +48,7 @@ class _LaunchScreenState extends State<LaunchScreen>
   @override
   void initState() {
     super.initState();
-    setState(() {
       initializeDefault();
-    });
-
-    controller =
-        AnimationController(duration: Duration(seconds: 1), vsync: this);
-    animation = ColorTween(begin: Colors.blueGrey, end: Color.fromRGBO(187, 222, 251, 1),)
-        .animate(controller);
-    controller.forward();
-    controller.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
@@ -73,7 +66,7 @@ class _LaunchScreenState extends State<LaunchScreen>
     double fontSize = appConfigWidth * 0.005;
 
     return Scaffold(
-      backgroundColor: animation.value,
+      backgroundColor: Color.fromRGBO(187, 222, 251, 1),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(

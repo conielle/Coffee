@@ -227,7 +227,6 @@ class _FavsScreenState extends State<FavsScreen> {
                                     SizedBox(height: appConfigblockSizeHeight * 1,),
                                     (doc.data()['sweetner'] == 'null') ? Text('I don\'t like sweetner', style: TextStyle(color: Colors.white, fontSize: fontSize * 7),) : (doc.data()['sweetner'] == '0') ? Text('I don\'t like sweetner', style: TextStyle(color: Colors.white, fontSize: fontSize * 7),) : Text("I like ${doc.data()['sweetner']} sweetners", style: TextStyle(color: Colors.white, fontSize: fontSize * 7),),
                                     SizedBox(height: appConfigblockSizeHeight * 1,),
-                                    Text('My coffee tastes good!', style: TextStyle(color: Colors.white, fontSize: fontSize * 5),),
 
                                   ],
 

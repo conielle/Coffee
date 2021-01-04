@@ -42,22 +42,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
-    setState(() {
-    });
 
-    controller =
-        AnimationController(duration: Duration(seconds: 1), vsync: this);
-    animation = ColorTween(begin: Colors.blueGrey, end: Color.fromRGBO(187, 222, 251, 1),)
-        .animate(controller);
-    controller.forward();
-    controller.addListener(() {
-      setState(() {});
-    });
+
   }
 
   @override
   void dispose() {
-    controller.dispose();
     super.dispose();
   }
 
@@ -70,7 +60,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     double fontSize = appConfigWidth * 0.005;
 
     return Scaffold(
-      backgroundColor: animation.value,
+      backgroundColor: Color.fromRGBO(187, 222, 251, 1),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(

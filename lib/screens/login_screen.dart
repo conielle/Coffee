@@ -21,7 +21,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   _firstLaunchSet() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isFirstLaunch', false);
+    prefs.setBool('isFirstLaunch', true);
+
+    print("First Launch");
   }
 
   @override

@@ -3,7 +3,6 @@ import 'package:coffee/screens/config_screen.dart';
 import 'package:coffee/screens/favs_screen.dart';
 import 'package:coffee/screens/selection_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:io';
@@ -11,6 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:coffee/components/rounded_button.dart';
 import 'package:audioplayers/audio_cache.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+
+import 'selection_screen.dart';
 
 const alarmAudioPath = "siren.mp3";
 
@@ -37,6 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String name;
   bool milk;
   String thevalue;
+  var stream;
 
   var welcomeList = List.from([
     'images/tracy.png',
@@ -65,11 +68,12 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    stream = FirebaseFirestore.instance.collection('coffee').snapshots();
+    getCurrentUser();
     firebaseCloudMessaging_Listeners();
     pushNotif();
     iOS_Permission();
     getDataCheck();
-    getCurrentUser();
     getCurrentEmail();
     getCurrentValue();
     favsVisible();
@@ -303,6 +307,7 @@ class _ChatScreenState extends State<ChatScreen> {
     player.play(alarmAudioPath);
   }
 
+
   @override
   Widget build(BuildContext context) {
     double appConfigWidth = MediaQuery.of(context).size.width;
@@ -325,39 +330,44 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: BoxDecoration(
                   color: Color.fromRGBO(25, 117, 210, 1),
                 ),
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          '${(coffeeammount == null ? 0 : coffeeammount)} Coffee\'s requested today.',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.autorenew,
-                            color: Colors.white,
+                child: Padding(padding: EdgeInsets.only(left: appConfigblockSizeWidth * 5),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            '${(coffeeammount == null ? 0 : coffeeammount)} Coffee\'s requested today.',
+                            style: TextStyle(color: Colors.white),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _reset();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                          IconButton(
+                            icon: Icon(
+                              Icons.autorenew,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _reset();
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
+                height: appConfigblockSizeHeight * 7.5,
                 decoration: BoxDecoration(
                   color: Color.fromRGBO(25, 117, 210, 1),
                   borderRadius: BorderRadius.only(
                       bottomRight: Radius.circular(appConfigblockSizeWidth * 6),
                       bottomLeft: Radius.circular(appConfigblockSizeWidth * 6)),
                 ),
+
                 child: Column(
                   children: <Widget>[
                     FlatButton(
@@ -373,12 +383,14 @@ class _ChatScreenState extends State<ChatScreen> {
                             color: Colors.white,
                           ),
                           SizedBox(
-                            width: appConfigblockSizeWidth * 2,
+                            width: appConfigblockSizeWidth * 4
+                            ,
                           ),
                           Text(
                             'Request a coffee?',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: Colors.white, fontSize: fontSize * 12, fontWeight: FontWeight.w700),
                           ),
+                          SizedBox(height: appConfigblockSizeHeight * 4,)
                         ],
                       ),
                     )
@@ -386,9 +398,38 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('coffee').snapshots(),
+                  stream: stream,
                   builder: (context, snapshot) {
-                    if (snapshot.hasData) {
+                    if (snapshot.data == null)
+
+                      {return FlatButton(
+                        onPressed: (){Navigator.pushNamed(context, SelectionScreen.id);
+                        },
+                        child: Container(
+                            child: Column(
+                              children: <Widget>[Image.asset(welcomeList[random()], height: appConfigblockSizeWidth * 75,)],
+                            )),
+                      );
+
+
+                      }
+
+                    else if(snapshot.data.docs.isEmpty) {return FlatButton(
+
+                      onPressed: (){Navigator.pushNamed(context, SelectionScreen.id);
+                      },
+
+                      child: Container(
+                          child: Column(
+                            children: <Widget>[Image.asset(
+                                welcomeList[random()], height: appConfigblockSizeWidth * 75,)],
+                          )),
+                    );
+                    }
+
+                    else
+
+                    {
                       return Column(
                         children: snapshot.data.docs.reversed.map((doc) {
                           return Padding(
@@ -682,18 +723,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           );
                         }).toList(),
                       );
-                    } else
-                      return Container(
-                          child: Column(
-                        children: <Widget>[Image.asset(welcomeList[random()])],
-                      ));
+                    }
                   }),
-              SizedBox(
-                height: appConfigblockSizeHeight * 2,
-              ),
+
               RoundedButton(
                   title: 'Whats Taking So Long?',
-                  colour: Colors.blueAccent,
+                  colour: Color.fromRGBO(25, 117, 210, 1),
                   onPressed: () {
                     hurryUp();
                   }),
@@ -713,97 +748,99 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: Column(
                               children: <Widget>[
                                 SizedBox(
-                                  height: appConfigblockSizeHeight * 5,
+                                  height: appConfigblockSizeHeight * 0.5,
                                 ),
                                 (favvisible == null)
                                     ? SizedBox()
                                     : Text(
                                         'Your favourites are scrollable below',
                                         style: TextStyle(
-                                            color: Colors.blueAccent,
-                                            fontSize: fontSize * 6)),
+                                            color: Color.fromRGBO(25, 117, 210, 1),
+                                            fontSize: fontSize * 6, fontWeight: FontWeight.w600)),
                                 SizedBox(
-                                  height: appConfigblockSizeHeight * 2,
+                                  height: appConfigblockSizeHeight * 1.5,
                                 ),
                                 SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children:
-                                        snapshot.data.docs.map((doc) {
-                                      return Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 5, left: 5),
-                                            child: Container(
-                                              height:
-                                                  appConfigblockSizeWidth * 22,
-                                              width:
-                                                  appConfigblockSizeWidth * 22,
-                                              decoration: BoxDecoration(
-                                                color: Color.fromRGBO(
-                                                    25, 117, 210, 1),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        appConfigblockSizeWidth *
-                                                            15),
-                                              ),
-                                              child: FlatButton(
-                                                onPressed: () async {
-                                                  coffeevalue = doc.data()['id'];
-                                                  coffeename = doc.data()['name'];
+                                  child: Padding(padding: const EdgeInsets.only(
+                                      right: 15),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children:
+                                          snapshot.data.docs.map((doc) {
+                                        return Column(
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5, left: 15),
+                                              child: Container(
+                                                height:
+                                                    appConfigblockSizeWidth * 22,
+                                                width:
+                                                    appConfigblockSizeWidth * 22,
+                                                decoration: BoxDecoration(
+                                                  color: Color.fromRGBO(25, 117, 210, 1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          appConfigblockSizeWidth *
+                                                              15),
+                                                ),
+                                                child: FlatButton(
+                                                  onPressed: () async {
+                                                    coffeevalue = doc.data()['id'];
+                                                    coffeename = doc.data()['name'];
 
-                                                  SharedPreferences coffee =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  coffee.setString('coffeeid',
-                                                      '$coffeevalue');
+                                                    SharedPreferences coffee =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    coffee.setString('coffeeid',
+                                                        '$coffeevalue');
 
-                                                  SharedPreferences
-                                                      coffeenames =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  coffeenames.setString(
-                                                      'coffeename',
-                                                      '$coffeename');
+                                                    SharedPreferences
+                                                        coffeenames =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    coffeenames.setString(
+                                                        'coffeename',
+                                                        '$coffeename');
 
-                                                  SharedPreferences image =
-                                                      await SharedPreferences
-                                                          .getInstance();
-                                                  image.setString('coffeeimage',
-                                                      'images/${coffeevalue}.png');
+                                                    SharedPreferences image =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    image.setString('coffeeimage',
+                                                        'images/${coffeevalue}.png');
 
-                                                  Navigator.pushNamed(
-                                                      context, ConfigScreen.id);
-                                                },
-                                                child: ListView(children: [
-                                                  Container(
-                                                    child: Column(
-                                                      children: <Widget>[
-                                                        SizedBox(
-                                                          height:
-                                                              appConfigblockSizeWidth *
-                                                                  4,
-                                                        ),
-                                                        Image.asset(
-                                                          'images/${doc.data()['id']}.png',
-                                                          scale:
-                                                              appConfigblockSizeWidth *
-                                                                  2,
-                                                        ),
-                                                      ],
+                                                    Navigator.pushNamed(
+                                                        context, ConfigScreen.id);
+                                                  },
+                                                  child: ListView(children: [
+                                                    Container(
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          SizedBox(
+                                                            height:
+                                                                appConfigblockSizeWidth *
+                                                                    4,
+                                                          ),
+                                                          Image.asset(
+                                                            'images/${doc.data()['id']}.png',
+                                                            scale:
+                                                                appConfigblockSizeWidth *
+                                                                    2,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                ]),
+                                                  ]),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    }).toList(),
+                                          ],
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -825,7 +862,7 @@ class _ChatScreenState extends State<ChatScreen> {
         onPressed: () {
           Navigator.pushNamed(context, FavsScreen.id);
         },
-        child: Icon(Icons.settings),
+        child: Icon(Icons.settings,),
       ), // This trailing
     );
   }
