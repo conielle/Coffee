@@ -35,3 +35,7 @@ Version 2.0.0
 - UI Overhaul
 - Code revision
 - Bug fixes
+
+Version 2.0.1
+- Fixed Push Notifications not displaying outside app
+- Fixed Firebase Cloud Function bug

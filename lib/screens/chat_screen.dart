@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:coffee/components/rounded_button.dart';
 import 'package:audioplayers/audio_cache.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'selection_screen.dart';
 
@@ -29,7 +28,9 @@ User loggedInUser;
 class _ChatScreenState extends State<ChatScreen> {
   static AudioCache player = new AudioCache();
 
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  String token = '';
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   final _auth = FirebaseAuth.instance;
   var data;
   String coffeevalue;
@@ -69,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     stream = FirebaseFirestore.instance.collection('coffee').snapshots();
+    getToken();
     getCurrentUser();
     firebaseCloudMessaging_Listeners();
     pushNotif();
@@ -77,11 +79,16 @@ class _ChatScreenState extends State<ChatScreen> {
     getCurrentEmail();
     getCurrentValue();
     favsVisible();
-    getToken();
+
+    super.initState();
+
+
+
   }
 
+
   void pushNotif() {
-    _firebaseMessaging.subscribeToTopic('coffee');
+    firebaseMessaging.subscribeToTopic('coffee');
   }
 
   void firebaseCloudMessaging_Listeners() async {
@@ -108,8 +115,8 @@ class _ChatScreenState extends State<ChatScreen> {
       print(e);
     }
 
-    _firebaseMessaging.getToken().then((token) {
-      _firebaseMessaging.subscribeToTopic('coffee');
+    firebaseMessaging.getToken().then((token) {
+      firebaseMessaging.subscribeToTopic('coffee');
 
       FirebaseFirestore.instance
           .collection("tokens")
@@ -117,31 +124,27 @@ class _ChatScreenState extends State<ChatScreen> {
           .update({"token": "$token", "email": '$email', "name": '$name'});
     });
 
-    _firebaseMessaging.configure(
+    firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-
-        print("onMessage: $message");
-        (message['notification']['title'] == 'Oh Boy! You\'re In Trouble!')
-            ? {player.play(alarmAudioPath)
-              }
-            : {print('none')};
       },
-      onResume: (Map<String, dynamic> message) async {},
-      onLaunch: (Map<String, dynamic> message) async {},
+      onLaunch: (Map<String, dynamic> message) async {
+      },
+      onResume: (Map<String, dynamic> message) async {
+      },
     );
   }
 
   void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
+    firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true, provisional: false));
+    firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {});
   }
 
   getDataCheck() async {
-    await
-    FirebaseFirestore.instance
-        .collection("coffee").get()
+    await FirebaseFirestore.instance
+        .collection("coffee")
+        .get()
         .then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         thevalue = result['sender'];
@@ -195,11 +198,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
   getCurrentValue() async {
-    await
-    FirebaseFirestore.instance
-        .collection("amount").get()
+    await FirebaseFirestore.instance
+        .collection("amount")
+        .get()
         .then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         coffeeammount = result['amount'];
@@ -210,7 +212,6 @@ class _ChatScreenState extends State<ChatScreen> {
       return coffeeammount;
     });
   }
-
 
   void _reset() {
     int addedamount = 0;
@@ -245,15 +246,16 @@ class _ChatScreenState extends State<ChatScreen> {
     var name;
 
     await FirebaseFirestore.instance
-        .collection("tokens").get()
+        .collection("tokens")
+        .get()
         .then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         token = result['token'];
         dbemail = result['email'];
         name = result['name'];
-        print("this is your $token");
-        print("this is your $dbemail");
-        print("this is your $name");
+        print("this is your toke $token");
+        print("this is your email $dbemail");
+        print("this is your name $name");
       });
     });
   }
@@ -294,7 +296,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   imComing() async {
-    await FirebaseFirestore.instance.collection('hurryup').doc('hurryup').delete();
+    await FirebaseFirestore.instance
+        .collection('hurryup')
+        .doc('hurryup')
+        .delete();
   }
 
   hurryUp() async {
@@ -306,7 +311,6 @@ class _ChatScreenState extends State<ChatScreen> {
   playSound() async {
     player.play(alarmAudioPath);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -330,8 +334,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: BoxDecoration(
                   color: Color.fromRGBO(25, 117, 210, 1),
                 ),
-                child: Padding(padding: EdgeInsets.only(left: appConfigblockSizeWidth * 5),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+                child: Padding(
+                  padding: EdgeInsets.only(left: appConfigblockSizeWidth * 5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Row(
@@ -367,7 +373,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       bottomRight: Radius.circular(appConfigblockSizeWidth * 6),
                       bottomLeft: Radius.circular(appConfigblockSizeWidth * 6)),
                 ),
-
                 child: Column(
                   children: <Widget>[
                     FlatButton(
@@ -383,14 +388,18 @@ class _ChatScreenState extends State<ChatScreen> {
                             color: Colors.white,
                           ),
                           SizedBox(
-                            width: appConfigblockSizeWidth * 4
-                            ,
+                            width: appConfigblockSizeWidth * 4,
                           ),
                           Text(
                             'Request a coffee?',
-                            style: TextStyle(color: Colors.white, fontSize: fontSize * 12, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: fontSize * 12,
+                                fontWeight: FontWeight.w700),
                           ),
-                          SizedBox(height: appConfigblockSizeHeight * 4,)
+                          SizedBox(
+                            height: appConfigblockSizeHeight * 4,
+                          )
                         ],
                       ),
                     )
@@ -400,36 +409,37 @@ class _ChatScreenState extends State<ChatScreen> {
               StreamBuilder<QuerySnapshot>(
                   stream: stream,
                   builder: (context, snapshot) {
-                    if (snapshot.data == null)
-
-                      {return FlatButton(
-                        onPressed: (){Navigator.pushNamed(context, SelectionScreen.id);
+                    if (snapshot.data == null) {
+                      return FlatButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, SelectionScreen.id);
                         },
                         child: Container(
                             child: Column(
-                              children: <Widget>[Image.asset(welcomeList[random()], height: appConfigblockSizeWidth * 75,)],
-                            )),
+                          children: <Widget>[
+                            Image.asset(
+                              welcomeList[random()],
+                              height: appConfigblockSizeWidth * 75,
+                            )
+                          ],
+                        )),
                       );
-
-
-                      }
-
-                    else if(snapshot.data.docs.isEmpty) {return FlatButton(
-
-                      onPressed: (){Navigator.pushNamed(context, SelectionScreen.id);
-                      },
-
-                      child: Container(
-                          child: Column(
-                            children: <Widget>[Image.asset(
-                                welcomeList[random()], height: appConfigblockSizeWidth * 75,)],
-                          )),
-                    );
-                    }
-
-                    else
-
-                    {
+                    } else if (snapshot.data.docs.isEmpty) {
+                      return FlatButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, SelectionScreen.id);
+                        },
+                        child: Container(
+                            child: Column(
+                          children: <Widget>[
+                            Image.asset(
+                              welcomeList[random()],
+                              height: appConfigblockSizeWidth * 75,
+                            )
+                          ],
+                        )),
+                      );
+                    } else {
                       return Column(
                         children: snapshot.data.docs.reversed.map((doc) {
                           return Padding(
@@ -461,12 +471,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                         CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                     Text(
-                                              "${doc.data()['sender']} requests a Coffee!",
-                                              style: new TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white),
-                                            ),
+                                      Text(
+                                        "${doc.data()['sender']} requests a Coffee!",
+                                        style: new TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white),
+                                      ),
                                     ],
                                   ),
                                   SizedBox(
@@ -487,46 +497,48 @@ class _ChatScreenState extends State<ChatScreen> {
                                       ),
                                       Column(
                                         children: <Widget>[
-                                         (doc.data()['clockwise'] ==
-                                                      'true')
-                                                  ? Text(
-                                                      'Please stir clockwise',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize:
-                                                              fontSize * 7),
-                                                    )
-                                                  : Text(
-                                                      'Please stir anti-clockwise',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize:
-                                                              fontSize * 7),
-                                                    ),
+                                          (doc.data()['clockwise'] == 'true')
+                                              ? Text(
+                                                  'Please stir clockwise',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                )
+                                              : Text(
+                                                  'Please stir anti-clockwise',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                ),
                                           SizedBox(
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                         (doc.data()['milk'] == 'false')
-                                                  ? Text(
-                                                      'No milk please',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize:
-                                                              fontSize * 7),
-                                                    )
-                                                  : Text(
-                                                      'Some milk please',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize:
-                                                              fontSize * 7),
-                                                    ),
+                                          (doc.data()['milk'] == 'false')
+                                              ? Text(
+                                                  'No milk please',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                )
+                                              : Text(
+                                                  'Some milk please',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                ),
                                           SizedBox(
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                         (doc.data()['coffee'] == 'null')
+                                          (doc.data()['coffee'] == 'null')
+                                              ? Text(
+                                                  'Just wing it with the coffee',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                )
+                                              : (doc.data()['coffee'] == '')
                                                   ? Text(
                                                       'Just wing it with the coffee',
                                                       style: TextStyle(
@@ -534,7 +546,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                                           fontSize:
                                                               fontSize * 7),
                                                     )
-                                                  : (doc.data()['coffee'] == '')
+                                                  : (doc.data()['Coffee'] ==
+                                                          '0')
                                                       ? Text(
                                                           'Just wing it with the coffee',
                                                           style: TextStyle(
@@ -544,9 +557,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                                                   fontSize * 7),
                                                         )
                                                       : (doc.data()['Coffee'] ==
-                                                              '0')
+                                                              '0.5')
                                                           ? Text(
-                                                              'Just wing it with the coffee',
+                                                              'Half a teaspoon coffee',
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .white,
@@ -554,10 +567,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                                                       fontSize *
                                                                           7),
                                                             )
-                                                          : (doc.data()['Coffee'] ==
-                                                                  '0.5')
+                                                          : (doc.data()[
+                                                                      'Coffee'] ==
+                                                                  '1')
                                                               ? Text(
-                                                                  'Half a teaspoon coffee',
+                                                                  'One teaspoon of Coffee',
                                                                   style: TextStyle(
                                                                       color: Colors
                                                                           .white,
@@ -565,8 +579,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                                                           fontSize *
                                                                               7),
                                                                 )
-                                                              : (doc.data()['Coffee'] ==
-                                                                      '1')
+                                                              : (doc.data()[
+                                                                          'Coffee'] ==
+                                                                      'one')
                                                                   ? Text(
                                                                       'One teaspoon of Coffee',
                                                                       style: TextStyle(
@@ -575,25 +590,26 @@ class _ChatScreenState extends State<ChatScreen> {
                                                                           fontSize:
                                                                               fontSize * 7),
                                                                     )
-                                                                  : (doc.data()['Coffee'] ==
-                                                                          'one')
-                                                                      ? Text(
-                                                                          'One teaspoon of Coffee',
-                                                                          style: TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontSize: fontSize * 7),
-                                                                        )
-                                                                      : Text(
-                                                                          "${doc.data()['coffee']} teaspoons coffee",
-                                                                          style: TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontSize: fontSize * 7),
-                                                                        ),
+                                                                  : Text(
+                                                                      "${doc.data()['coffee']} teaspoons coffee",
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontSize:
+                                                                              fontSize * 7),
+                                                                    ),
                                           SizedBox(
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
                                           (doc.data()['sugar'] == 'null')
+                                              ? Text(
+                                                  'Nope! No sugar thanks',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                )
+                                              : (doc.data()['sugar'] == '0')
                                                   ? Text(
                                                       'Nope! No sugar thanks',
                                                       style: TextStyle(
@@ -601,28 +617,25 @@ class _ChatScreenState extends State<ChatScreen> {
                                                           fontSize:
                                                               fontSize * 7),
                                                     )
-                                                  : (doc.data()['sugar'] == '0')
-                                                      ? Text(
-                                                          'Nope! No sugar thanks',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize:
-                                                                  fontSize * 7),
-                                                        )
-                                                      : Text(
-                                                          "Could I have ${doc.data()['sugar']} sugars please",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize:
-                                                                  fontSize * 7),
-                                                        ),
+                                                  : Text(
+                                                      "Could I have ${doc.data()['sugar']} sugars please",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize:
+                                                              fontSize * 7),
+                                                    ),
                                           SizedBox(
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                         (doc.data()['sweetner'] == 'null')
+                                          (doc.data()['sweetner'] == 'null')
+                                              ? Text(
+                                                  'Nope! No sweetner thanks',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: fontSize * 7),
+                                                )
+                                              : (doc.data()['sweetner'] == '0')
                                                   ? Text(
                                                       'Nope! No sweetner thanks',
                                                       style: TextStyle(
@@ -630,34 +643,23 @@ class _ChatScreenState extends State<ChatScreen> {
                                                           fontSize:
                                                               fontSize * 7),
                                                     )
-                                                  : (doc.data()['sweetner'] ==
-                                                          '0')
-                                                      ? Text(
-                                                          'Nope! No sweetner thanks',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize:
-                                                                  fontSize * 7),
-                                                        )
-                                                      : Text(
-                                                          "${doc.data()['sweetner']} sweetners please",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize:
-                                                                  fontSize * 7),
-                                                        ),
+                                                  : Text(
+                                                      "${doc.data()['sweetner']} sweetners please",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize:
+                                                              fontSize * 7),
+                                                    ),
                                           SizedBox(
                                             height:
                                                 appConfigblockSizeHeight * 0.5,
                                           ),
-                                         Text(
-                                                  'Thank you kindly.',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: fontSize * 6),
-                                                ),
+                                          Text(
+                                            'Thank you kindly.',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: fontSize * 6),
+                                          ),
                                         ],
                                       )
                                     ],
@@ -670,7 +672,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     }
                   }),
-
               RoundedButton(
                   title: 'Whats Taking So Long?',
                   colour: Color.fromRGBO(25, 117, 210, 1),
@@ -700,21 +701,23 @@ class _ChatScreenState extends State<ChatScreen> {
                                     : Text(
                                         'Your favourites are scrollable below',
                                         style: TextStyle(
-                                            color: Color.fromRGBO(25, 117, 210, 1),
-                                            fontSize: fontSize * 6, fontWeight: FontWeight.w600)),
+                                            color:
+                                                Color.fromRGBO(25, 117, 210, 1),
+                                            fontSize: fontSize * 6,
+                                            fontWeight: FontWeight.w600)),
                                 SizedBox(
                                   height: appConfigblockSizeHeight * 1.5,
                                 ),
                                 SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
-                                  child: Padding(padding: const EdgeInsets.only(
-                                      right: 15),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 15),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
-                                      children:
-                                          snapshot.data.docs.map((doc) {
+                                      children: snapshot.data.docs.map((doc) {
                                         return Column(
                                           children: <Widget>[
                                             Padding(
@@ -722,11 +725,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   top: 5, left: 15),
                                               child: Container(
                                                 height:
-                                                    appConfigblockSizeWidth * 22,
-                                                width:
-                                                    appConfigblockSizeWidth * 22,
+                                                    appConfigblockSizeWidth *
+                                                        22,
+                                                width: appConfigblockSizeWidth *
+                                                    22,
                                                 decoration: BoxDecoration(
-                                                  color: Color.fromRGBO(25, 117, 210, 1),
+                                                  color: Color.fromRGBO(
+                                                      25, 117, 210, 1),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           appConfigblockSizeWidth *
@@ -734,8 +739,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                                 ),
                                                 child: FlatButton(
                                                   onPressed: () async {
-                                                    coffeevalue = doc.data()['id'];
-                                                    coffeename = doc.data()['name'];
+                                                    coffeevalue =
+                                                        doc.data()['id'];
+                                                    coffeename =
+                                                        doc.data()['name'];
 
                                                     SharedPreferences coffee =
                                                         await SharedPreferences
@@ -754,11 +761,12 @@ class _ChatScreenState extends State<ChatScreen> {
                                                     SharedPreferences image =
                                                         await SharedPreferences
                                                             .getInstance();
-                                                    image.setString('coffeeimage',
+                                                    image.setString(
+                                                        'coffeeimage',
                                                         'images/${coffeevalue}.png');
 
-                                                    Navigator.pushNamed(
-                                                        context, ConfigScreen.id);
+                                                    Navigator.pushNamed(context,
+                                                        ConfigScreen.id);
                                                   },
                                                   child: ListView(children: [
                                                     Container(
@@ -807,7 +815,9 @@ class _ChatScreenState extends State<ChatScreen> {
         onPressed: () {
           Navigator.pushNamed(context, FavsScreen.id);
         },
-        child: Icon(Icons.settings,),
+        child: Icon(
+          Icons.settings,
+        ),
       ), // This trailing
     );
   }

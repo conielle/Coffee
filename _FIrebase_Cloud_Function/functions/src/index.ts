@@ -16,8 +16,7 @@ export const coffeeRequest = functions.firestore
       title: `There's a coffee request!`,
       body: `${values.sender} asks that you please make them a ${values.type}! They\'d really appreciated if you could quickly do that.`,
       icon: 'http://http://conielle.co.za/coffee/icon.png',
-      sound: 'default',
-      click_action: 'FLUTTER_NOTIFICATION_CLICK' // required only for onResume or onLaunch callbacks
+      sound: 'default'
     }
   };
 
@@ -35,8 +34,7 @@ export const coffeeComplete = functions.firestore
       title: 'Your coffee is made!',
       body: `Sit back and relax! The coffee is coming now! It\'s either standing on the counter, on its way to where you are or your barista has forgotten. If you don't get it soon buzz them.`,
       icon: 'http://http://conielle.co.za/coffee/icon.png',
-      sound: 'default',
-      click_action: 'FLUTTER_NOTIFICATION_CLICK' // required only for onResume or onLaunch callbacks
+      sound: 'default'
     }
   };
 
@@ -62,8 +60,7 @@ const tokens = receiver.token;
       notification: {
         title: 'Oh Boy! You\'re In Trouble!',
         body: `It seems you are taking quite some time with these coffee requests, shout for more time or hurry up! `,
-        icon: 'http:\\conielle.co.za\coffee\icon.png',
-        click_action: 'FLUTTER_NOTIFICATION_CLICK'
+        icon: 'http:\\conielle.co.za\coffee\icon.png'
       }
     };
 
